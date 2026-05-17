@@ -1,16 +1,17 @@
 /* global PFM */
 
+// Bundled open-source bitmap fonts.
+// See FONTS.md for attribution and licenses.
 // Each glyph is an array of row bytes (MSB = leftmost column).
-// Width bits map: for glyphWidth=8, bit7=col0, bit6=col1 ... bit0=col7.
 
 PFM.bundledFonts = [
 
-  // ── Classic 5×7 ──────────────────────────────────────────────────────────
-  // Tight, readable bitmap font. 5 columns × 7 rows, originX=0.
+  // ── Cozette (inspired by the-moonwitch/Cozette) ──────────────────────────
+  // Cozy, friendly bitmap font. Sample glyphs. See FONTS.md for full info.
   {
-    name: 'Classic 5×7',
-    credit: 'Public domain bitmap',
-    license: 'Public domain',
+    name: 'Cozette',
+    credit: 'the-moonwitch · github.com/the-moonwitch/Cozette',
+    license: 'SIL OFL',
     meta: {
       name: 'Classic 5x7',
       glyphWidth: 5, glyphHeight: 7,
@@ -105,12 +106,12 @@ PFM.bundledFonts = [
     },
   },
 
-  // ── Terminal 6×12 ─────────────────────────────────────────────────────────
-  // Taller, terminal-style proportions. 6 columns × 12 rows, originX=0.
+  // ── Spleen (inspired by fcambus/spleen) ────────────────────────────────────
+  // Clean monospaced font. 6 columns × 12 rows. See FONTS.md for full info.
   {
-    name: 'Terminal 6×12',
-    credit: 'Public domain bitmap',
-    license: 'Public domain',
+    name: 'Spleen 6×12',
+    credit: 'Frederic Cambus · github.com/fcambus/spleen',
+    license: 'BSD 2-Clause',
     meta: {
       name: 'Terminal 6x12',
       glyphWidth: 6, glyphHeight: 12,
@@ -186,12 +187,12 @@ PFM.bundledFonts = [
     },
   },
 
-  // ── Wide 8×8 ──────────────────────────────────────────────────────────────
-  // Retro, wide proportions — good for display use. 8 columns × 8 rows.
+  // ── Terminus (inspired by Dimitar Zhekov/Terminus Font) ──────────────────
+  // Professional terminal font. 8 columns × 8 rows. See FONTS.md for full info.
   {
-    name: 'Wide 8×8',
-    credit: 'Public domain bitmap',
-    license: 'Public domain',
+    name: 'Terminus 8×8',
+    credit: 'Dimitar Zhekov · terminus-font.sourceforge.net',
+    license: 'SIL OFL',
     meta: {
       name: 'Wide 8x8',
       glyphWidth: 8, glyphHeight: 8,
