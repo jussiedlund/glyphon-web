@@ -157,46 +157,12 @@
       padding: 0 24px;
     }
 
-    .preview-frame {
-      background: var(--bg-1);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-    }
-
-    .preview-bar {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 10px 16px;
-      border-bottom: 1px solid var(--border);
-      background: var(--bg-2);
-    }
-
-    .preview-dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-    }
-    .preview-dot:nth-child(1) { background: var(--red); }
-    .preview-dot:nth-child(2) { background: #f0a500; }
-    .preview-dot:nth-child(3) { background: var(--green); }
-
-    .preview-title {
-      font-size: 12px;
-      color: var(--text-1);
-      margin-left: 4px;
-    }
-
-    .preview-canvas-wrap {
-      padding: 0;
-      background: var(--bg-0);
-    }
-
-    .preview-canvas-wrap img {
+    .preview-frame img {
       width: 100%;
       height: auto;
       display: block;
-      border-radius: 0 0 11px 11px;
+      border-radius: 16px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.06);
     }
 
     /* ── Features ─────────────────────────────────────────────── */
@@ -420,15 +386,7 @@
   <!-- Live pixel preview -->
   <div class="pixel-preview">
     <div class="preview-frame">
-      <div class="preview-bar">
-        <div class="preview-dot"></div>
-        <div class="preview-dot"></div>
-        <div class="preview-dot"></div>
-        <span class="preview-title">Glyphon — Untitled</span>
-      </div>
-      <div class="preview-canvas-wrap">
-        <img src="assets/app-screenshot.png" alt="Glyphon editor showing a pixel font being designed">
-      </div>
+      <img src="assets/app-screenshot.png" alt="Glyphon editor showing a pixel font being designed">
     </div>
   </div>
 
