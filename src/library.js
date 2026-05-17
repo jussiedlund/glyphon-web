@@ -150,14 +150,21 @@ PFM.library = (() => {
   function _bundledToProject(def) {
     const { glyphWidth: w, glyphHeight: h } = def.meta;
     const glyphs = {};
-    for (const [cpStr, rows] of Object.entries(def.glyphs)) {
+    for (const [cpStr, glyph] of Object.entries(def.glyphs)) {
       const cp = parseInt(cpStr);
       const pixels = new Uint8Array(w * h);
-      for (let r = 0; r < rows.length && r < h; r++) {
-        const byte = rows[r];
-        for (let c = 0; c < w; c++) {
-          pixels[r * w + c] = (byte >> (w - 1 - c)) & 1;
+      if (Array.isArray(glyph)) {
+        // Row-bytes format: [0xF8, 0x20, ...]
+        for (let r = 0; r < glyph.length && r < h; r++) {
+          const byte = glyph[r];
+          for (let c = 0; c < w; c++) {
+            pixels[r * w + c] = (byte >> (w - 1 - c)) & 1;
+          }
         }
+      } else {
+        // Flat pixels format from BDF converter: { codePoint, pixels: [0,1,...], advanceWidth }
+        const src = glyph.pixels;
+        for (let i = 0; i < src.length && i < w * h; i++) pixels[i] = src[i];
       }
       glyphs[cp] = { codePoint: cp, pixels, advanceWidth: null };
     }
