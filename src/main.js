@@ -45,7 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('zoom-fit-btn')?.addEventListener('click', () => PFM.canvasEditor.resetZoom());
 
   // Library button
-  document.getElementById('library-btn')?.addEventListener('click', () => PFM.libraryPanel.open());
+  document.getElementById('library-btn')?.addEventListener('click', () => PFM.library.show());
 
   // Undo/redo buttons
   document.getElementById('undo-btn')?.addEventListener('click', () => PFM.state.dispatch({ type: 'UNDO' }));
