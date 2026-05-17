@@ -133,7 +133,10 @@ PFM.shortcuts = (() => {
       <div class="modal-box modal-box--narrow">
         <div class="modal-header">
           <span class="modal-title">Keyboard Shortcuts</span>
-          <button class="icon-btn modal-close-btn">✕</button>
+          <div style="display:flex;gap:8px;align-items:center">
+            <a href="about.html" target="_blank" style="font-size:12px;color:var(--text-1);text-decoration:none" onmouseover="this.style.color='var(--text-0)'" onmouseout="this.style.color='var(--text-1)'">About Glyphon ↗</a>
+            <button class="icon-btn modal-close-btn">✕</button>
+          </div>
         </div>
         <div class="modal-body shortcuts-list">
           ${shown.map(s => `

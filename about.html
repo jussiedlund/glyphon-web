@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glyphon — Pixel Font Editor</title>
+  <meta name="description" content="Design bitmap fonts with a live pixel editor, export to TTF, BDF, or JSON, and draw inspiration from an open-source font library.">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-0:    #0d0d0f;
+      --bg-1:    #161618;
+      --bg-2:    #1c1c1e;
+      --bg-3:    #242428;
+      --border:  #2c2c32;
+      --accent:  #4f7bff;
+      --accent-h:#6d94ff;
+      --text-0:  #e8e8e8;
+      --text-1:  #686878;
+      --text-2:  #404050;
+      --green:   #44cc88;
+      --red:     #ff453a;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg-0);
+      color: var(--text-0);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { color: var(--accent-h); }
+
+    /* ── Nav ──────────────────────────────────────────────────── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 32px;
+      height: 52px;
+      background: rgba(13,13,15,0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 600;
+      font-size: 15px;
+      color: var(--text-0);
+    }
+
+    .nav-logo img { height: 22px; }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-size: 13px;
+      color: var(--text-1);
+    }
+
+    .nav-links a { color: var(--text-1); }
+    .nav-links a:hover { color: var(--text-0); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--accent-h); color: #fff; }
+
+    .btn-secondary {
+      background: var(--bg-3);
+      color: var(--text-0);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: #2e2e34; }
+
+    /* ── Hero ─────────────────────────────────────────────────── */
+    .hero {
+      text-align: center;
+      padding: 96px 24px 80px;
+      max-width: 720px;
+      margin: 0 auto;
+    }
+
+    .hero-eyebrow {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(79,123,255,0.12);
+      border: 1px solid rgba(79,123,255,0.25);
+      border-radius: 100px;
+      padding: 4px 12px;
+      margin-bottom: 28px;
+    }
+
+    .hero h1 {
+      font-size: clamp(36px, 6vw, 60px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+      margin-bottom: 20px;
+      color: var(--text-0);
+    }
+
+    .hero h1 span { color: var(--accent); }
+
+    .hero p {
+      font-size: 18px;
+      color: var(--text-1);
+      max-width: 520px;
+      margin: 0 auto 40px;
+      line-height: 1.7;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .hero-cta .btn { padding: 10px 22px; font-size: 14px; }
+
+    /* ── Pixel preview canvas ─────────────────────────────────── */
+    .pixel-preview {
+      margin: 0 auto 96px;
+      max-width: 900px;
+      padding: 0 24px;
+    }
+
+    .preview-frame {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .preview-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-2);
+    }
+
+    .preview-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+    }
+    .preview-dot:nth-child(1) { background: var(--red); }
+    .preview-dot:nth-child(2) { background: #f0a500; }
+    .preview-dot:nth-child(3) { background: var(--green); }
+
+    .preview-title {
+      font-size: 12px;
+      color: var(--text-1);
+      margin-left: 4px;
+    }
+
+    .preview-canvas-wrap {
+      padding: 32px;
+      text-align: center;
+      background: var(--bg-0);
+    }
+
+    canvas#hero-canvas {
+      image-rendering: pixelated;
+    }
+
+    /* ── Features ─────────────────────────────────────────────── */
+    .section {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 0 24px 96px;
+    }
+
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    .section h2 {
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .section-sub {
+      color: var(--text-1);
+      font-size: 16px;
+      max-width: 560px;
+      margin-bottom: 56px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .feature-card {
+      background: var(--bg-1);
+      padding: 28px;
+    }
+
+    .feature-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: rgba(79,123,255,0.12);
+      border: 1px solid rgba(79,123,255,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      margin-bottom: 16px;
+    }
+
+    .feature-card h3 {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 13px;
+      color: var(--text-1);
+      line-height: 1.6;
+    }
+
+    /* ── Platforms ────────────────────────────────────────────── */
+    .platforms-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .platform-card {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .platform-card.available { border-color: rgba(79,123,255,0.35); }
+
+    .platform-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 3px 10px;
+      border-radius: 100px;
+      width: fit-content;
+    }
+
+    .badge-live {
+      background: rgba(68,204,136,0.12);
+      border: 1px solid rgba(68,204,136,0.3);
+      color: var(--green);
+    }
+
+    .badge-soon {
+      background: var(--bg-3);
+      border: 1px solid var(--border);
+      color: var(--text-1);
+    }
+
+    .platform-card h3 { font-size: 17px; font-weight: 600; }
+
+    .platform-card p {
+      font-size: 13px;
+      color: var(--text-1);
+      line-height: 1.6;
+      flex: 1;
+    }
+
+    /* ── Fonts ────────────────────────────────────────────────── */
+    .fonts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .font-card {
+      background: var(--bg-1);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+    }
+
+    .font-preview {
+      font-size: 28px;
+      letter-spacing: 0.04em;
+      margin-bottom: 16px;
+      color: var(--accent);
+      font-family: monospace;
+      line-height: 1;
+    }
+
+    .font-name { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+
+    .font-meta { font-size: 12px; color: var(--text-1); }
+
+    .font-license {
+      display: inline-block;
+      margin-top: 10px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      background: rgba(68,204,136,0.1);
+      border: 1px solid rgba(68,204,136,0.25);
+      color: var(--green);
+      border-radius: 4px;
+      padding: 2px 7px;
+    }
+
+    /* ── Footer ───────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 40px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      color: var(--text-1);
+      font-size: 13px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    footer a { color: var(--text-1); }
+    footer a:hover { color: var(--text-0); }
+
+    .footer-links { display: flex; gap: 20px; flex-wrap: wrap; }
+
+    /* ── Divider ──────────────────────────────────────────────── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0 24px 80px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <a class="nav-logo" href="about.html">
+      <img src="assets/glyphon-logo.png" alt="Glyphon">
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#platforms">Platforms</a>
+      <a href="#fonts">Fonts</a>
+      <a class="btn btn-primary" href="index.html">Open Editor →</a>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero">
+    <div class="hero-eyebrow">Free &amp; Open Source</div>
+    <h1>Design <span>pixel fonts</span><br>the way you draw</h1>
+    <p>A live bitmap font editor with a character library, real-time preview, and export to TTF, BDF, and JSON.</p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="index.html">Try in Browser</a>
+      <a class="btn btn-secondary" href="https://github.com/jussiedlund/glyphon-web" target="_blank">View on GitHub</a>
+    </div>
+  </section>
+
+  <!-- Live pixel preview -->
+  <div class="pixel-preview">
+    <div class="preview-frame">
+      <div class="preview-bar">
+        <div class="preview-dot"></div>
+        <div class="preview-dot"></div>
+        <div class="preview-dot"></div>
+        <span class="preview-title">Glyphon — Untitled</span>
+      </div>
+      <div class="preview-canvas-wrap">
+        <canvas id="hero-canvas" width="720" height="120"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- Features -->
+  <section class="section" id="features">
+    <div class="section-label">Features</div>
+    <h2>Everything you need to make a bitmap font</h2>
+    <p class="section-sub">Draw glyphs pixel by pixel, tune metrics with draggable guides, preview text in real time.</p>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">✏️</div>
+        <h3>Pixel Grid Editor</h3>
+        <p>Click or drag to set pixels. Draw, fill, shift, flip, undo — full editing toolkit with keyboard shortcuts.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📐</div>
+        <h3>Live Metric Guides</h3>
+        <p>Drag ascender, cap-height, x-height, baseline, and descender lines directly on the canvas.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔤</div>
+        <h3>Full Character Set</h3>
+        <p>Navigate 191 glyphs — uppercase, lowercase, digits, and punctuation — with a scrollable glyph panel.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">👁️</div>
+        <h3>Real-time Preview</h3>
+        <p>Type sample text and see it render at any scale using your font as you design it.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📚</div>
+        <h3>Font Library</h3>
+        <p>Save your fonts locally and browse open-source bitmap fonts as starting points — all free to use and modify.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📦</div>
+        <h3>Export Anywhere</h3>
+        <p>Export as a working TTF vector font, BDF bitmap file, or Glyphon's portable JSON format.</p>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- Platforms -->
+  <section class="section" id="platforms">
+    <div class="section-label">Platforms</div>
+    <h2>Use it everywhere</h2>
+    <p class="section-sub">Start in the browser today. Native apps for Mac and iOS are on the way.</p>
+
+    <div class="platforms-grid">
+      <div class="platform-card available">
+        <span class="platform-badge badge-live">● Live</span>
+        <h3>Web</h3>
+        <p>Runs in any modern browser. No installation, no account — open and start drawing.</p>
+        <a class="btn btn-primary" href="index.html">Open Editor →</a>
+      </div>
+      <div class="platform-card">
+        <span class="platform-badge badge-soon">Coming soon</span>
+        <h3>macOS</h3>
+        <p>A native Mac app with deeper system integration, offline use, and file-based workflows.</p>
+        <span style="font-size:13px; color: var(--text-2);">In development</span>
+      </div>
+      <div class="platform-card">
+        <span class="platform-badge badge-soon">Coming soon</span>
+        <h3>iOS &amp; iPadOS</h3>
+        <p>Design fonts on your iPad with touch and Apple Pencil support for precise pixel work.</p>
+        <span style="font-size:13px; color: var(--text-2);">In development</span>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider">
+
+  <!-- Bundled Fonts -->
+  <section class="section" id="fonts">
+    <div class="section-label">Open Source Library</div>
+    <h2>Great fonts, ready to remix</h2>
+    <p class="section-sub">The library includes complete, authentic open-source bitmap fonts you can load and modify as a starting point.</p>
+
+    <div class="fonts-grid">
+      <div class="font-card">
+        <div class="font-preview">Aa</div>
+        <div class="font-name">Cozette</div>
+        <div class="font-meta">13×15 · by the-moonwitch</div>
+        <div class="font-meta"><a href="https://github.com/the-moonwitch/Cozette" target="_blank">github.com/the-moonwitch/Cozette</a></div>
+        <span class="font-license">SIL OFL</span>
+      </div>
+      <div class="font-card">
+        <div class="font-preview">Aa</div>
+        <div class="font-name">Spleen 5×8</div>
+        <div class="font-meta">5×8 · by Frederic Cambus</div>
+        <div class="font-meta"><a href="https://github.com/fcambus/spleen" target="_blank">github.com/fcambus/spleen</a></div>
+        <span class="font-license">BSD 2-Clause</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <span>© 2025 Glyphon</span>
+    <div class="footer-links">
+      <a href="index.html">Editor</a>
+      <a href="https://github.com/jussiedlund/glyphon-web" target="_blank">GitHub</a>
+      <a href="FONTS.md">Font Credits</a>
+    </div>
+  </footer>
+
+  <script>
+    // Draw a live pixel-font preview on the hero canvas using Cozette-style glyphs
+    (function () {
+      const canvas = document.getElementById('hero-canvas');
+      const ctx = canvas.getContext('2d');
+      const W = canvas.width, H = canvas.height;
+
+      // Simple 5×7 pixel font data for the preview text "GLYPHON"
+      const GLYPHS = {
+        G: [[0,1,1,1,0],[1,0,0,0,0],[1,0,1,1,1],[1,0,0,0,1],[0,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0]],
+        L: [[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0]],
+        Y: [[1,0,0,0,1],[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+        P: [[1,1,1,1,0],[1,0,0,0,1],[1,1,1,1,0],[1,0,0,0,0],[1,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
+        H: [[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[0,0,0,0,0],[0,0,0,0,0]],
+        O: [[0,1,1,1,0],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[0,1,1,1,0],[0,0,0,0,0],[0,0,0,0,0]],
+        N: [[1,0,0,0,1],[1,1,0,0,1],[1,0,1,0,1],[1,0,0,1,1],[1,0,0,0,1],[0,0,0,0,0],[0,0,0,0,0]],
+      };
+
+      const TEXT = 'GLYPHON';
+      const SCALE = 8;
+      const PW = 5, PH = 7;
+      const GAP = 2;
+
+      const totalW = TEXT.length * (PW + GAP) * SCALE - GAP * SCALE;
+      const totalH = PH * SCALE;
+      const ox = Math.round((W - totalW) / 2);
+      const oy = Math.round((H - totalH) / 2);
+
+      ctx.clearRect(0, 0, W, H);
+
+      TEXT.split('').forEach((ch, ci) => {
+        const glyph = GLYPHS[ch];
+        if (!glyph) return;
+        const x0 = ox + ci * (PW + GAP) * SCALE;
+        glyph.forEach((row, r) => {
+          row.forEach((bit, c) => {
+            if (!bit) return;
+            // Blue-ish accent pixels
+            const alpha = 0.85 + Math.random() * 0.15;
+            ctx.fillStyle = `rgba(79,123,255,${alpha})`;
+            ctx.fillRect(x0 + c * SCALE, oy + r * SCALE, SCALE - 1, SCALE - 1);
+          });
+        });
+      });
+    })();
+  </script>
+
+</body>
+</html>
