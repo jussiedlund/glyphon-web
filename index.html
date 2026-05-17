@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Glyphon</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="lib/lucide.min.js?v=1778942429"></script>
+</head>
+<body>
+  <div id="app">
+
+    <!-- ── Top bar ───────────────────────────────────────────────────── -->
+    <div id="top-bar">
+      <div class="topbar-left">
+        <img src="assets/glyphon-logo.png" class="top-logo" alt="Glyphon">
+        <span id="current-font-name" class="font-name-display">Untitled</span>
+      </div>
+      <div class="topbar-right">
+        <button class="icon-btn" id="help-btn" title="Help (?)"><i data-lucide="circle-help"></i></button>
+        <button class="btn-secondary" id="library-btn"><i data-lucide="library"></i> Library</button>
+        <button class="btn-secondary" id="import-btn"><i data-lucide="folder-open"></i> Open…</button>
+        <input type="file" id="import-file-input" accept=".json" style="display:none">
+        <div class="export-menu-wrap">
+          <button class="btn-primary" id="export-ttf-btn"><i data-lucide="download"></i> TTF</button>
+          <button class="btn-secondary" id="export-bdf-btn">BDF</button>
+          <button class="btn-secondary" id="export-json-btn">JSON</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Main area ─────────────────────────────────────────────────── -->
+    <div id="main-area">
+
+      <!-- Vertical tool strip -->
+      <div id="tool-strip">
+        <div class="strip-group">
+          <button class="tool-btn active" data-tool="draw" title="Draw / toggle pixel (B)"><i data-lucide="pencil"></i></button>
+          <button class="tool-btn"        data-tool="fill" title="Flood fill (F)"><i data-lucide="paint-bucket"></i></button>
+        </div>
+
+        <div class="strip-sep"></div>
+
+        <div class="strip-group">
+          <button class="icon-btn" id="undo-btn" title="Undo (⌘Z)" disabled><i data-lucide="undo-2"></i></button>
+          <button class="icon-btn" id="redo-btn" title="Redo (⌘⇧Z)" disabled><i data-lucide="redo-2"></i></button>
+        </div>
+
+        <div class="strip-sep"></div>
+
+        <div class="strip-group">
+          <button class="icon-btn" id="zoom-in-btn"  title="Zoom in (+)"><i data-lucide="zoom-in"></i></button>
+          <button class="icon-btn" id="zoom-fit-btn" title="Fit (0)"><i data-lucide="maximize-2"></i></button>
+          <button class="icon-btn" id="zoom-out-btn" title="Zoom out (-)"><i data-lucide="zoom-out"></i></button>
+        </div>
+
+        <div class="strip-sep"></div>
+
+        <div class="strip-group">
+          <button class="icon-btn" id="flip-h-btn"      title="Flip horizontal (H)"><i data-lucide="flip-horizontal-2"></i></button>
+          <button class="icon-btn" id="flip-v-btn"      title="Flip vertical (V)"><i data-lucide="flip-vertical-2"></i></button>
+          <button class="icon-btn" id="clear-glyph-btn" title="Clear glyph (Del)"><i data-lucide="trash-2"></i></button>
+        </div>
+
+        <div class="strip-sep"></div>
+
+        <!-- Shift arrows: diamond layout -->
+        <div class="strip-arrows">
+          <button class="strip-btn" id="shift-up-btn"    title="Shift pixels up (⇧K)"><i data-lucide="arrow-up"></i></button>
+          <div class="strip-lr">
+            <button class="strip-btn" id="shift-left-btn"  title="Shift pixels left (⇧H)"><i data-lucide="arrow-left"></i></button>
+            <button class="strip-btn" id="shift-right-btn" title="Shift pixels right (⇧L)"><i data-lucide="arrow-right"></i></button>
+          </div>
+          <button class="strip-btn" id="shift-down-btn"  title="Shift pixels down (⇧J)"><i data-lucide="arrow-down"></i></button>
+        </div>
+
+        <div class="strip-sep"></div>
+
+        <div class="strip-group">
+          <button class="icon-btn" id="copy-glyph-btn"    title="Copy glyph (⌘C)"><i data-lucide="copy"></i></button>
+          <button class="icon-btn" id="paste-glyph-btn"   title="Paste glyph (⌘V)" disabled><i data-lucide="clipboard"></i></button>
+          <button class="icon-btn" id="toggle-guides-btn" title="Toggle guides" aria-pressed="true"><i data-lucide="ruler"></i></button>
+        </div>
+      </div>
+
+      <!-- Left: character navigator -->
+      <div id="char-nav">
+        <div id="char-nav-scroll"></div>
+        <div id="char-nav-footer">
+          <span class="nav-footer-cp" id="nav-footer-cp">U+0020</span>
+          <span class="nav-footer-ch" id="nav-footer-ch"> </span>
+          <span class="nav-footer-adv" id="nav-footer-adv"></span>
+        </div>
+      </div>
+
+      <!-- Center: pixel grid editor -->
+      <div id="editor-area">
+        <canvas id="grid-canvas"></canvas>
+        <!-- Guide pill handles (absolutely positioned, updated by canvas-editor.js) -->
+        <div id="guide-pills" aria-hidden="true"></div>
+      </div>
+
+      <!-- Right: metrics + glyph info -->
+      <div id="metrics-panel"></div>
+
+    </div>
+
+    <!-- ── Preview bar ───────────────────────────────────────────────── -->
+    <div id="preview-bar">
+      <div class="preview-controls">
+        <label class="preview-label">Preview</label>
+        <input id="preview-input" type="text" placeholder="Type to preview…" value="AaBbCcDd 0123">
+        <label class="preview-label">Scale</label>
+        <select id="preview-scale">
+          <option value="1">1×</option>
+          <option value="2" selected>2×</option>
+          <option value="3">3×</option>
+          <option value="4">4×</option>
+          <option value="6">6×</option>
+          <option value="8">8×</option>
+        </select>
+      </div>
+      <div id="preview-canvas-wrap">
+        <canvas id="preview-canvas"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Scripts: loaded in dependency order -->
+  <script src="lib/opentype.min.js?v=1778942429"></script>
+  <script src="src/data-model.js?v=1778942429"></script>
+  <script src="src/state.js?v=1778942429"></script>
+  <script src="src/storage.js?v=1778942429"></script>
+  <script src="src/canvas-editor.js?v=1778942429"></script>
+  <script src="src/char-navigator.js?v=1778942429"></script>
+  <script src="src/metrics-panel.js?v=1778942429"></script>
+  <script src="src/preview.js?v=1778942429"></script>
+  <script src="src/export-ttf.js?v=1778942429"></script>
+  <script src="src/export-bdf.js?v=1778942429"></script>
+  <script src="src/export-json.js?v=1778942429"></script>
+  <script src="src/shortcuts.js?v=1778942429"></script>
+  <script src="src/main.js?v=1778942429"></script>
+</body>
+</html>
