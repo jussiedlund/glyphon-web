@@ -188,13 +188,15 @@
     }
 
     .preview-canvas-wrap {
-      padding: 32px;
-      text-align: center;
+      padding: 0;
       background: var(--bg-0);
     }
 
-    canvas#hero-canvas {
-      image-rendering: pixelated;
+    .preview-canvas-wrap img {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 0 0 11px 11px;
     }
 
     /* ── Features ─────────────────────────────────────────────── */
@@ -425,7 +427,7 @@
         <span class="preview-title">Glyphon — Untitled</span>
       </div>
       <div class="preview-canvas-wrap">
-        <canvas id="hero-canvas" width="720" height="120"></canvas>
+        <img src="assets/app-screenshot.png" alt="Glyphon editor showing a pixel font being designed">
       </div>
     </div>
   </div>
@@ -536,52 +538,6 @@
     </div>
   </footer>
 
-  <script>
-    // Draw a live pixel-font preview on the hero canvas using Cozette-style glyphs
-    (function () {
-      const canvas = document.getElementById('hero-canvas');
-      const ctx = canvas.getContext('2d');
-      const W = canvas.width, H = canvas.height;
-
-      // Simple 5×7 pixel font data for the preview text "GLYPHON"
-      const GLYPHS = {
-        G: [[0,1,1,1,0],[1,0,0,0,0],[1,0,1,1,1],[1,0,0,0,1],[0,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0]],
-        L: [[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,0,0,0,0],[1,1,1,1,1],[0,0,0,0,0],[0,0,0,0,0]],
-        Y: [[1,0,0,0,1],[1,0,0,0,1],[0,1,0,1,0],[0,0,1,0,0],[0,0,1,0,0],[0,0,0,0,0],[0,0,0,0,0]],
-        P: [[1,1,1,1,0],[1,0,0,0,1],[1,1,1,1,0],[1,0,0,0,0],[1,0,0,0,0],[0,0,0,0,0],[0,0,0,0,0]],
-        H: [[1,0,0,0,1],[1,0,0,0,1],[1,1,1,1,1],[1,0,0,0,1],[1,0,0,0,1],[0,0,0,0,0],[0,0,0,0,0]],
-        O: [[0,1,1,1,0],[1,0,0,0,1],[1,0,0,0,1],[1,0,0,0,1],[0,1,1,1,0],[0,0,0,0,0],[0,0,0,0,0]],
-        N: [[1,0,0,0,1],[1,1,0,0,1],[1,0,1,0,1],[1,0,0,1,1],[1,0,0,0,1],[0,0,0,0,0],[0,0,0,0,0]],
-      };
-
-      const TEXT = 'GLYPHON';
-      const SCALE = 8;
-      const PW = 5, PH = 7;
-      const GAP = 2;
-
-      const totalW = TEXT.length * (PW + GAP) * SCALE - GAP * SCALE;
-      const totalH = PH * SCALE;
-      const ox = Math.round((W - totalW) / 2);
-      const oy = Math.round((H - totalH) / 2);
-
-      ctx.clearRect(0, 0, W, H);
-
-      TEXT.split('').forEach((ch, ci) => {
-        const glyph = GLYPHS[ch];
-        if (!glyph) return;
-        const x0 = ox + ci * (PW + GAP) * SCALE;
-        glyph.forEach((row, r) => {
-          row.forEach((bit, c) => {
-            if (!bit) return;
-            // Blue-ish accent pixels
-            const alpha = 0.85 + Math.random() * 0.15;
-            ctx.fillStyle = `rgba(79,123,255,${alpha})`;
-            ctx.fillRect(x0 + c * SCALE, oy + r * SCALE, SCALE - 1, SCALE - 1);
-          });
-        });
-      });
-    })();
-  </script>
 
 </body>
 </html>
