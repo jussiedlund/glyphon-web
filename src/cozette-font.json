@@ -6,10 +6,10 @@
     "originX": 1,
     "advanceWidth": 14,
     "baseline": 11,
-    "ascender": 0,
+    "ascender": 1,
     "descender": 14,
-    "capHeight": 7,
-    "xHeight": 7,
+    "capHeight": 4,
+    "xHeight": 6,
     "unitsPerEm": 1500
   },
   "glyphs": {

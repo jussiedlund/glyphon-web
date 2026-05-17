@@ -21,6 +21,7 @@ def parse_bdf(filename):
         lines = f.readlines()
 
     font_bbox = None   # (fw, fh, fx_off, fy_off)
+    props = {}         # FONT_ASCENT, FONT_DESCENT, CAP_HEIGHT, X_HEIGHT
     glyphs = {}
 
     code_point = None
@@ -35,6 +36,11 @@ def parse_bdf(filename):
             parts = line.split()
             if len(parts) >= 5:
                 font_bbox = (int(parts[1]), int(parts[2]), int(parts[3]), int(parts[4]))
+
+        elif line.startswith(('FONT_ASCENT', 'FONT_DESCENT', 'CAP_HEIGHT', 'X_HEIGHT')):
+            parts = line.split()
+            if len(parts) >= 2:
+                props[parts[0]] = int(parts[1])
 
         elif line.startswith('ENCODING'):
             code_point = int(line.split()[1])
@@ -66,15 +72,17 @@ def parse_bdf(filename):
             except ValueError:
                 pass
 
-    return font_bbox, glyphs
+    return font_bbox, props, glyphs
 
 
-def glyphs_to_pfm(font_name, font_bbox, glyphs):
+def glyphs_to_pfm(font_name, font_bbox, props, glyphs):
     """Convert parsed glyphs to pfm.json format, respecting per-glyph BBX placement."""
     if not font_bbox:
         return None
 
     fw, fh, fx_off, fy_off = font_bbox
+    if props is None:
+        props = {}
 
     pfm_glyphs = {}
     for code_point, glyph_data in glyphs.items():
@@ -116,22 +124,34 @@ def glyphs_to_pfm(font_name, font_bbox, glyphs):
             'advanceWidth': None,
         }
 
-    # Baseline = canvas row of the BDF baseline (y=0 in glyph coords)
-    # baseline_row = (fh - 1) - (0 - fy_off) = fh - 1 + fy_off
+    # All canvas rows: row 0 = top, increasing downward.
+    # BDF baseline is y=0; canvas_row = (fh-1) - (bdf_y - fy_off)
+    # For a BDF y value: canvas_row = (fh - 1 + fy_off) - bdf_y
     baseline_row = fh - 1 + fy_off
+
+    font_ascent  = props.get('FONT_ASCENT',  fh + fy_off)       # pixels above baseline
+    font_descent = props.get('FONT_DESCENT', -fy_off)            # pixels below baseline (positive)
+    cap_height   = props.get('CAP_HEIGHT',   font_ascent)        # pixels above baseline
+    x_height     = props.get('X_HEIGHT',     font_ascent // 2)   # pixels above baseline
+
+    # Convert BDF metric (pixels above/below baseline) → canvas row
+    ascender_row  = baseline_row - font_ascent
+    descender_row = baseline_row + font_descent
+    cap_row       = baseline_row - cap_height
+    xh_row        = baseline_row - x_height
 
     return {
         'meta': {
             'name':        font_name,
             'glyphWidth':  fw,
             'glyphHeight': fh,
-            'originX':     -fx_off,   # canvas column of the origin (x=0)
+            'originX':     -fx_off,
             'advanceWidth': fw + 1,
             'baseline':    baseline_row,
-            'ascender':    0,
-            'descender':   fh - 1,
-            'capHeight':   fh // 2,
-            'xHeight':     fh // 2,
+            'ascender':    max(0, ascender_row),
+            'descender':   min(fh - 1, descender_row),
+            'capHeight':   max(0, cap_row),
+            'xHeight':     max(0, xh_row),
             'unitsPerEm':  fh * 100,
         },
         'glyphs': pfm_glyphs,
@@ -148,7 +168,7 @@ def main():
     font_name = sys.argv[3] if len(sys.argv) > 3 else 'Font'
 
     print(f'Parsing {bdf_file}...')
-    font_bbox, glyphs = parse_bdf(bdf_file)
+    font_bbox, props, glyphs = parse_bdf(bdf_file)
 
     if not font_bbox:
         print('Error: FONTBOUNDINGBOX not found')
@@ -156,8 +176,9 @@ def main():
 
     fw, fh, fx_off, fy_off = font_bbox
     print(f'Found {len(glyphs)} glyphs, canvas: {fw}×{fh} (offset {fx_off},{fy_off})')
+    print(f'Props: {props}')
 
-    pfm = glyphs_to_pfm(font_name, font_bbox, glyphs)
+    pfm = glyphs_to_pfm(font_name, font_bbox, props, glyphs)
 
     with open(json_file, 'w') as f:
         json.dump(pfm, f, indent=2)
