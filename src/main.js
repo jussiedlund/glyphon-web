@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   PFM.canvasEditor.init(document.getElementById('grid-canvas'));
   PFM.charNavigator.init(document.getElementById('char-nav'));
   PFM.metricsPanel.init(document.getElementById('metrics-panel'));
+  PFM.refFont.initPanel(document.getElementById('metrics-panel'));
   PFM.preview.init(
     document.getElementById('preview-canvas'),
     document.getElementById('preview-input'),

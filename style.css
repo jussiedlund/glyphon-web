@@ -775,3 +775,131 @@ kbd {
   padding: 20px 0;
   grid-column: 1 / -1;
 }
+
+/* ── Reference Font panel section ────────────────────────────────────── */
+.ref-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+/* iOS-style toggle switch */
+.ref-toggle {
+  position: relative;
+  display: inline-block;
+  width: 30px;
+  height: 17px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.ref-toggle input { display: none; }
+.ref-toggle-track {
+  position: absolute;
+  inset: 0;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  transition: background 0.15s, border-color 0.15s;
+}
+.ref-toggle-track::after {
+  content: '';
+  position: absolute;
+  top: 2px; left: 2px;
+  width: 11px; height: 11px;
+  background: var(--text-1);
+  border-radius: 50%;
+  transition: transform 0.15s, background 0.15s;
+}
+.ref-toggle input:checked + .ref-toggle-track {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.ref-toggle input:checked + .ref-toggle-track::after {
+  transform: translateX(13px);
+  background: #fff;
+}
+
+/* Slider rows (label + range + value) */
+.ref-slider-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.ref-slider {
+  flex: 1;
+  accent-color: var(--accent);
+  min-width: 0;
+  height: 3px;
+  cursor: pointer;
+}
+.ref-val {
+  font-size: 10px;
+  color: var(--text-1);
+  font-family: monospace;
+  width: 30px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+/* Family text input — full width within field-row */
+.ref-family-input {
+  flex: 1 !important;
+  width: auto !important;
+  min-width: 0;
+}
+
+/* Divider before derived metrics sub-section */
+.ref-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 8px -12px;
+}
+
+/* Metrics comparison table */
+.ref-metrics-table {
+  background: var(--bg-0);
+  border-radius: 4px;
+  padding: 5px 8px;
+  margin-bottom: 0;
+}
+.ref-metric-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 0;
+  font-size: 11px;
+}
+.ref-metric-label {
+  color: var(--text-1);
+  width: 62px;
+  flex-shrink: 0;
+  font-size: 10px;
+}
+.ref-metric-num {
+  color: var(--text-1);
+  font-family: monospace;
+  font-size: 10px;
+  width: 18px;
+  text-align: center;
+}
+.ref-metric-changed {
+  color: var(--text-0);
+  font-weight: 700;
+}
+.ref-metric-arrow {
+  color: var(--text-2);
+  font-size: 9px;
+  flex: 1;
+  text-align: center;
+}
+.ref-apply-btn {
+  width: 100%;
+  padding: 5px 0;
+  font-size: 11px;
+}
+.ref-apply-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}

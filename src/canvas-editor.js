@@ -383,6 +383,11 @@ PFM.canvasEditor = (() => {
     // Update pill positions (or hide them)
     _updatePills(metaRows);
 
+    // Reference font overlay — drawn before pixels so user's marks sit on top
+    if (typeof PFM.refFont !== 'undefined') {
+      PFM.refFont.draw(_ctx, { ox, oy, ps, state });
+    }
+
     // Pixels
     if (pixels) {
       _ctx.fillStyle = '#f0f0f0';
