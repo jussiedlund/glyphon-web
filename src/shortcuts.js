@@ -34,7 +34,7 @@ PFM.shortcuts = (() => {
     { key: 'z', mod: 'ctrl+shift', label: 'Redo',        action: () => PFM.state.dispatch({ type: 'REDO' }) },
     { key: 'y', mod: 'ctrl', label: 'Redo',              action: () => PFM.state.dispatch({ type: 'REDO' }) },
     { key: 's', mod: 'ctrl', label: 'Save (JSON)',        action: () => PFM.exportJSON() },
-    { key: 'e', mod: 'ctrl', label: 'Export TTF',         action: () => PFM.exportTTF() },
+    { key: 'e', mod: 'ctrl', label: 'Export OTF',         action: () => PFM.exportTTF() },
     { key: 'c', mod: 'ctrl', label: 'Copy glyph',        action: _copyGlyph },
     { key: 'v', mod: 'ctrl', label: 'Paste glyph',       action: _pasteGlyph },
 
